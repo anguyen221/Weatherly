@@ -40,6 +40,8 @@ dependencies:
   location: ^8.0.0
   geocoding: ^3.0.0
   http: ^1.3.0
+  flutter_map: ^8.1.1
+  latlong2: ^0.9.1
 
 dev_dependencies:
   flutter_test:

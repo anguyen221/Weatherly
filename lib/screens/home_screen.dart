@@ -1,8 +1,11 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'forecast_screen.dart';
+import 'map_screen.dart'; 
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,8 +57,9 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
 
+    final userData = await userDataFuture!;
+
     if (index == 1) {
-      final userData = await userDataFuture!;
       final location = userData['location'];
 
       if (location != null) {
@@ -65,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
           final longitude = double.tryParse(coordinates[1]);
 
           if (latitude != null && longitude != null) {
-            // Pass selectedIndex and onItemTapped to ForecastScreen
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -74,6 +77,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   longitude: longitude,
                   selectedIndex: _selectedIndex,
                   onItemTapped: _onItemTapped,
+                ),
+              ),
+            );
+          }
+        }
+      }
+    } else if (index == 2) {
+      final location = userData['location'];
+
+      if (location != null) {
+        final coordinates = location.split(',');
+        if (coordinates.length == 2) {
+          final latitude = double.tryParse(coordinates[0]);
+          final longitude = double.tryParse(coordinates[1]);
+
+          if (latitude != null && longitude != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MapScreen(
+                  latitude: latitude,
+                  longitude: longitude,
                 ),
               ),
             );
@@ -148,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.map),
-            label: 'Map',
+            label: 'Map', 
           ),
         ],
       ),
