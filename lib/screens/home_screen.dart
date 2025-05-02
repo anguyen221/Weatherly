@@ -14,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Future<Map<String, String?>>? userDataFuture;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -47,6 +48,12 @@ class _HomeScreenState extends State<HomeScreen> {
         MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
@@ -94,15 +101,24 @@ class _HomeScreenState extends State<HomeScreen> {
                       )
                     : const SizedBox.shrink(),
                 const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                  },
-                  child: const Text('View Weather Forecast'),
-                ),
               ],
             ),
           );
         },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.wb_sunny),
+            label: 'Forecast',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: 'Map',
+          ),
+        ],
       ),
     );
   }
