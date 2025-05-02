@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
@@ -137,7 +139,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   onItemTapped: _onItemTapped,
                 ),
               ),
-            );
+            ).then((_) {
+              setState(() {
+                _selectedIndex = 0;
+              });
+            });
           } else if (index == 2) {
             Navigator.push(
               context,
@@ -147,7 +153,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   longitude: longitude,
                 ),
               ),
-            );
+            ).then((_) {
+              setState(() {
+                _selectedIndex = 0;
+              });
+            });
           }
         }
       }

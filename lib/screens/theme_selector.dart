@@ -1,3 +1,5 @@
+// ignore_for_file: use_super_parameters, use_build_context_synchronously, deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'themes.dart';
 
