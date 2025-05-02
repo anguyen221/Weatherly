@@ -5,40 +5,45 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  User? get currentUser => _auth.currentUser;
 
   Future<User?> register(String email, String password, String username) async {
     try {
-      UserCredential cred = await _auth.createUserWithEmailAndPassword(
+      final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      final user = userCredential.user;
 
-      await _firestore.collection('users').doc(cred.user!.uid).set({
-        'username': username,
-        'email': email,
-        'theme': 'default',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': email,
+          'username': username,
+          'location': '',
+        });
 
-      return cred.user;
-    } catch (e) {
-      print('Registration error: $e');
-      return null;
+        return user;
+      }
+    } on FirebaseAuthException catch (e) {
+      print('Error: ${e.message}');
     }
+    return null;
   }
 
   Future<User?> login(String email, String password) async {
     try {
-      UserCredential cred = await _auth.signInWithEmailAndPassword(
+      final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return cred.user;
-    } catch (e) {
-      print('Login error: $e');
-      return null;
+      return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      print('Error: ${e.message}');
     }
+    return null;
   }
 
   Future<void> logout() async {
