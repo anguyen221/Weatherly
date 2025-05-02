@@ -193,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: Colors.white,
+                            foregroundColor: Colors.black,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
@@ -207,7 +207,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             );
                           },
-                          child: const Text("📣 Community Reports"),
+                          child: const Text(
+                            '📣 Community Reports',
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -216,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
-                            foregroundColor: Colors.white,
+                            foregroundColor: Colors.black,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
@@ -230,7 +233,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             );
                           },
-                          child: const Text("☀️ Share Current Weather"),
+                          child: const Text(
+                            '🌈 Share Current Weather',
+                            style: TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
                     ],
