@@ -21,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<Map<String, String?>>? userDataFuture;
   int _selectedIndex = 0;
   String? _username;
+  String? _customLocation;
 
   @override
   void initState() {
@@ -44,13 +45,14 @@ class _HomeScreenState extends State<HomeScreen> {
           return {
             'username': doc['username'],
             'location': doc['location'],
+            'customLocation': doc['customLocation'],
           };
         }
       } catch (e) {
         print("Error loading user data: $e");
       }
     }
-    return {'username': null, 'location': null};
+    return {'username': null, 'location': null, 'customLocation': null};
   }
 
   void _logout() async {
@@ -69,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     final userData = await userDataFuture!;
-    final location = userData['location'];
+    final location = _customLocation ?? userData['customLocation'] ?? userData['location'];
     if (location == null) return;
 
     final coordinates = location.split(',');
@@ -111,6 +113,12 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _updateLocation(String newLocation) {
+    setState(() {
+      _customLocation = newLocation;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<String?>(
@@ -139,9 +147,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     MaterialPageRoute(
                       builder: (_) => SettingsScreen(
                         onUsernameUpdated: _updateUsername,
+                        onLocationUpdated: _updateLocation,
                       ),
                     ),
                   );
+                  setState(() {
+                    userDataFuture = _loadUserData();
+                  });
                 },
               ),
               IconButton(
@@ -163,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               final userData = snapshot.data;
               final username = _username ?? userData?['username'];
-              final location = userData?['location'];
+              final location = _customLocation ?? userData?['customLocation'] ?? userData?['location'];
 
               return Container(
                 decoration: AppThemes.getBackgroundDecoration(selectedTheme),

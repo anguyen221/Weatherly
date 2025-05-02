@@ -5,42 +5,54 @@ import 'themes.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(String) onUsernameUpdated;
+  final Function(String) onLocationUpdated;
 
-  const SettingsScreen({super.key, required this.onUsernameUpdated});
+  const SettingsScreen({
+    super.key,
+    required this.onUsernameUpdated,
+    required this.onLocationUpdated,
+  });
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
   String? _userId;
 
   @override
   void initState() {
     super.initState();
     _userId = AuthService().currentUser?.uid;
-    _loadCurrentUsername();
+    _loadUserSettings();
   }
 
-  Future<void> _loadCurrentUsername() async {
+  Future<void> _loadUserSettings() async {
     if (_userId != null) {
       final doc = await FirebaseFirestore.instance.collection('users').doc(_userId).get();
       if (doc.exists && doc.data() != null) {
-        _usernameController.text = doc['username'] ?? '';
+        final data = doc.data()!;
+        _usernameController.text = data['username'] ?? '';
+        _locationController.text = data['customLocation'] ?? '';
       }
     }
   }
 
-  void _updateUsername() async {
+  Future<void> _updateSettings() async {
     final newUsername = _usernameController.text.trim();
-    if (newUsername.isNotEmpty && _userId != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_userId)
-          .update({'username': newUsername});
+    final newLocation = _locationController.text.trim();
+
+    if (_userId != null && newUsername.isNotEmpty) {
+      await FirebaseFirestore.instance.collection('users').doc(_userId).update({
+        'username': newUsername,
+        'customLocation': newLocation,
+      });
 
       widget.onUsernameUpdated(newUsername);
+      widget.onLocationUpdated(newLocation);
+
       if (mounted) {
         Navigator.pop(context);
       }
@@ -67,9 +79,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     decoration: const InputDecoration(labelText: 'Username'),
                   ),
                   const SizedBox(height: 20),
+                  TextField(
+                    controller: _locationController,
+                    decoration: const InputDecoration(
+                      labelText: 'Location (e.g., 37.7749,-122.4194)',
+                    ),
+                  ),
+                  const SizedBox(height: 30),
                   ElevatedButton(
-                    onPressed: _updateUsername,
-                    child: const Text('Update Username'),
+                    onPressed: _updateSettings,
+                    child: const Text('Save Changes'),
                   ),
                 ],
               ),
