@@ -6,6 +6,7 @@ import 'forecast_screen.dart';
 import 'map_screen.dart';
 import 'themes.dart';
 import 'theme_selector.dart';
+import 'share_weather.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -164,6 +165,20 @@ class _HomeScreenState extends State<HomeScreen> {
                          )
                         : const SizedBox.shrink(),
                       const SizedBox(height: 20),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ShareWeatherScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'Share Current Weather',
+                          style: TextStyle(fontSize: 18, color: Colors.blue),
+                        ),
+                      ),
                     ],
                   ),
                 ),

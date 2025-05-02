@@ -19,7 +19,7 @@ class ThemeSelectorScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Theme'),
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
