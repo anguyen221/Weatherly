@@ -7,6 +7,7 @@ import 'map_screen.dart';
 import 'themes.dart';
 import 'theme_selector.dart';
 import 'share_weather.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Future<Map<String, String?>>? userDataFuture;
   int _selectedIndex = 0;
+  String? _username;
 
   @override
   void initState() {
@@ -102,6 +104,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _updateUsername(String newUsername) {
+    setState(() {
+      _username = newUsername;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<String?>(
@@ -118,6 +126,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const ThemeSelectorScreen()),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.settings),
+                tooltip: "Settings",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SettingsScreen(
+                        onUsernameUpdated: _updateUsername,
+                      ),
+                    ),
                   );
                 },
               ),
@@ -139,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
               }
 
               final userData = snapshot.data;
-              final username = userData?['username'];
+              final username = _username ?? userData?['username'];
               final location = userData?['location'];
 
               return Container(
@@ -183,7 +205,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               );
-
             },
           ),
           bottomNavigationBar: BottomNavigationBar(
