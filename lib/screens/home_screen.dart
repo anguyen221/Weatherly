@@ -14,6 +14,8 @@ import 'community_reports_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+const String apiKey = 'YOUR_OPENWEATHERMAP_API_KEY';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -22,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String? _customLocation;
   Future<Map<String, String?>>? userDataFuture;
   int _selectedIndex = 0;
   String city = '';
@@ -120,48 +123,46 @@ class _HomeScreenState extends State<HomeScreen> {
     final location = userData['location'];
     if (location == null) return;
 
-    if (location != null) {
-      final coordinates = location.split(',');
-      if (coordinates.length == 2) {
-        final latitude = double.tryParse(coordinates[0]);
-        final longitude = double.tryParse(coordinates[1]);
+    final coordinates = location.split(',');
+    if (coordinates.length == 2) {
+      final latitude = double.tryParse(coordinates[0]);
+      final longitude = double.tryParse(coordinates[1]);
 
-        if (latitude != null && longitude != null) {
-          if (index == 1) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ForecastScreen(
-                  latitude: latitude,
-                  longitude: longitude,
-                  selectedIndex: _selectedIndex,
-                  onItemTapped: _onItemTapped,
-                ),
+      if (latitude != null && longitude != null) {
+        if (index == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ForecastScreen(
+                latitude: latitude,
+                longitude: longitude,
+                selectedIndex: _selectedIndex,
+                onItemTapped: _onItemTapped,
               ),
-            ).then((_) {
-              setState(() {
-                _selectedIndex = 0;
-              });
+            ),
+          ).then((_) {
+            setState(() {
+              _selectedIndex = 0;
             });
-          } else if (index == 2) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MapScreen(
-                  latitude: latitude,
-                  longitude: longitude,
-                ),
+          });
+        } else if (index == 2) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MapScreen(
+                latitude: latitude,
+                longitude: longitude,
               ),
-            ).then((_) {
-              setState(() {
-                _selectedIndex = 0;
-              });
+            ),
+          ).then((_) {
+            setState(() {
+              _selectedIndex = 0;
             });
-          }
+          });
         }
       }
     }
-  }
+    }
 
   void _updateUsername(String newUsername) {
     setState(() {
@@ -172,6 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _updateLocation(String newLocation) {
     setState(() {
       _customLocation = newLocation;
+      _fetchWeather(newLocation);
     });
   }
 
