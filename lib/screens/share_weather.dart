@@ -21,21 +21,21 @@ class ShareWeatherScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                _shareWeather('Text');
+                _shareWeather(context, 'Text');
               },
               child: const Text('Share via Text'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                _shareWeather('Instagram');
+                _shareWeather(context, 'Instagram');
               },
               child: const Text('Share via Instagram'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                _shareWeather('Facebook');
+                _shareWeather(context, 'Facebook');
               },
               child: const Text('Share via Facebook'),
             ),
@@ -45,7 +45,7 @@ class ShareWeatherScreen extends StatelessWidget {
     );
   }
 
-  void _shareWeather(String platform) {
+  void _shareWeather(BuildContext context, String platform) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
