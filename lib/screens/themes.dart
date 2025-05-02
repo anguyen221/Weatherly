@@ -11,6 +11,8 @@ class AppThemes {
     'pink': 'assets/backgrounds/pink.jpg',
   };
 
+  static ValueNotifier<String?>? selectedTheme;
+
   static BoxDecoration getBackgroundDecoration(String? themeName) {
     final imagePath = themeImages[themeName];
     if (imagePath != null) {
@@ -28,6 +30,7 @@ class AppThemes {
   static Future<void> saveTheme(String themeName) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_themeKey, themeName);
+    selectedTheme?.value = themeName;
   }
 
   static Future<String?> loadTheme() async {
