@@ -10,7 +10,7 @@ class AuthService {
 
   User? get currentUser => _auth.currentUser;
 
-  Future<User?> register(String email, String password, String username) async {
+  Future<User?> register(String email, String password, String username, String location) async {
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -22,7 +22,7 @@ class AuthService {
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'email': email,
           'username': username,
-          'location': '',
+          'location': location, 
         });
 
         return user;
