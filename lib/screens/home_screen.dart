@@ -1,9 +1,10 @@
-// ignore_for_file: use_build_context_synchronously, avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'forecast_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,10 +51,35 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index) async {
     setState(() {
       _selectedIndex = index;
     });
+
+    if (index == 0) {
+      final userData = await userDataFuture!;
+      final location = userData['location'];
+
+      if (location != null) {
+        final coordinates = location.split(',');
+        if (coordinates.length == 2) {
+          final latitude = double.tryParse(coordinates[0]);
+          final longitude = double.tryParse(coordinates[1]);
+
+          if (latitude != null && longitude != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ForecastScreen(
+                  latitude: latitude,
+                  longitude: longitude,
+                ),
+              ),
+            );
+          }
+        }
+      }
+    }
   }
 
   @override
@@ -74,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
