@@ -8,6 +8,7 @@ import 'themes.dart';
 import 'theme_selector.dart';
 import 'share_weather.dart';
 import 'settings_screen.dart';
+import 'community_reports_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -174,31 +175,62 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       username != null
-                        ? Text(
-                          'Welcome, $username!',
-                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                         )
-                        : const Text("Loading..."),
+                          ? Text(
+                              'Welcome, $username!',
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            )
+                          : const Text("Loading..."),
                       const SizedBox(height: 10),
                       location != null
-                        ? Text(
-                          'Location: $location',
-                          style: const TextStyle(fontSize: 18),
-                         )
-                        : const SizedBox.shrink(),
+                          ? Text(
+                              'Location: $location',
+                              style: const TextStyle(fontSize: 18),
+                            )
+                          : const SizedBox.shrink(),
                       const SizedBox(height: 20),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ShareWeatherScreen(),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
                             ),
-                          );
-                        },
-                        child: const Text(
-                          'Share Current Weather',
-                          style: TextStyle(fontSize: 18, color: Colors.blue),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CommunityReportsScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text("📣 Community Reports"),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ShareWeatherScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text("☀️ Share Current Weather"),
                         ),
                       ),
                     ],
