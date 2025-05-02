@@ -5,7 +5,7 @@ import 'login_screen.dart';
 import '../services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'forecast_screen.dart';
-import 'map_screen.dart'; 
+import 'map_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -135,27 +135,54 @@ class _HomeScreenState extends State<HomeScreen> {
           final username = userData?['username'];
           final location = userData?['location'];
 
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                username != null
-                    ? Text(
-                        'Welcome, $username!',
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      )
-                    : const Text("Loading..."),
-                const SizedBox(height: 10),
-                location != null
-                    ? Text(
-                        'Location: $location',
-                        style: const TextStyle(fontSize: 18),
-                      )
-                    : const SizedBox.shrink(),
-                const SizedBox(height: 20),
-              ],
-            ),
+          return Stack(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/cloudbg.jpg'),
+                    repeat: ImageRepeat.repeat,
+                    fit: BoxFit.none,
+                  ),
+                ),
+              ),
+
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.white.withOpacity(0.85),
+                      Colors.blueAccent.withOpacity(0.2),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    username != null
+                        ? Text(
+                            'Welcome, $username!',
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          )
+                        : const Text("Loading..."),
+                    const SizedBox(height: 10),
+                    location != null
+                        ? Text(
+                            'Location: $location',
+                            style: const TextStyle(fontSize: 18),
+                          )
+                        : const SizedBox.shrink(),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ],
           );
         },
       ),
@@ -173,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.map),
-            label: 'Map', 
+            label: 'Map',
           ),
         ],
       ),
