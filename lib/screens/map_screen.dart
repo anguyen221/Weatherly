@@ -38,7 +38,7 @@ class _MapScreenState extends State<MapScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-            'https://api.openweathermap.org/data/2.5/weather?lat=${widget.latitude}&lon=${widget.longitude}&appid=$apiKey&units=metric'),
+            'https://api.openweathermap.org/data/2.5/weather?lat=${widget.latitude}&lon=${widget.longitude}&appid=$apiKey&units=imperial'),
       );
 
       if (response.statusCode == 200) {
@@ -126,7 +126,7 @@ class _MapScreenState extends State<MapScreen> {
                   style: const TextStyle(fontSize: 18),
                 ),
                 Text(
-                  'Temperature: $temperature°C',
+                  'Temperature: $temperature°F',
                   style: const TextStyle(fontSize: 18),
                 ),
               ],

@@ -39,7 +39,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-          '$apiUrl?lat=${widget.latitude}&lon=${widget.longitude}&appid=$apiKey&units=metric',
+          '$apiUrl?lat=${widget.latitude}&lon=${widget.longitude}&appid=$apiKey&units=imperial',
         ),
       ).timeout(const Duration(seconds: 10));
 
@@ -121,7 +121,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
                                     ),
                                     child: ListTile(
                                       title: Text(
-                                        '$time - $temp°C',
+                                        '$time - $temp°F',
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black87,

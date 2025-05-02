@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (lat == null || lon == null) return;
 
     final reverseGeoUrl = 'http://api.openweathermap.org/geo/1.0/reverse?lat=$lat&lon=$lon&limit=1&appid=$apiKey';
-    final weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric';
+    final weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=imperial';
 
     try {
       final geoRes = await http.get(Uri.parse(reverseGeoUrl));
@@ -253,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (!isWeatherLoading && city.isNotEmpty)
                         Text('Location: $city, $stateName', style: const TextStyle(fontSize: 18)),
                       if (!isWeatherLoading && temperature != 0.0)
-                        Text('Temperature: ${temperature.toStringAsFixed(1)}°C', style: const TextStyle(fontSize: 18)),
+                        Text('Temperature: ${temperature.toStringAsFixed(1)}°F', style: const TextStyle(fontSize: 18)),
                       if (!isWeatherLoading && weatherDescription.isNotEmpty)
                         Text('Condition: $weatherDescription', style: const TextStyle(fontSize: 18)),
                       if (!isWeatherLoading && weatherIcon.isNotEmpty)
