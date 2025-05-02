@@ -5,10 +5,10 @@ class AppThemes {
   static const String _themeKey = 'selected_background';
 
   static const Map<String, String> themeImages = {
-    'blue': 'assets/backgrounds/blue.jpg',
-    'yellow': 'assets/backgrounds/yellow.png',
-    'green': 'assets/backgrounds/green.png',
-    'pink': 'assets/backgrounds/pink.jpg',
+    'blue': 'assets/blue.jpg',
+    'yellow': 'assets/yellow.png',
+    'green': 'assets/green.png',
+    'pink': 'assets/pink.jpg',
   };
 
   static ValueNotifier<String?>? selectedTheme;
