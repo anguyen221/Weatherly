@@ -1,11 +1,11 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'forecast_screen.dart';
 import 'map_screen.dart';
+import 'themes.dart';
+import 'theme_selector.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,6 +22,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     userDataFuture = _loadUserData();
+
+    if (AppThemes.selectedTheme == null) {
+      AppThemes.loadTheme().then((theme) {
+        AppThemes.selectedTheme = ValueNotifier<String?>(theme);
+        setState(() {});
+      });
+    }
   }
 
   Future<Map<String, String?>> _loadUserData() async {
@@ -58,152 +65,129 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     final userData = await userDataFuture!;
+    final location = userData['location'];
+    if (location == null) return;
+
+    final coordinates = location.split(',');
+    if (coordinates.length != 2) return;
+
+    final latitude = double.tryParse(coordinates[0]);
+    final longitude = double.tryParse(coordinates[1]);
+
+    if (latitude == null || longitude == null) return;
 
     if (index == 1) {
-      final location = userData['location'];
-
-      if (location != null) {
-        final coordinates = location.split(',');
-        if (coordinates.length == 2) {
-          final latitude = double.tryParse(coordinates[0]);
-          final longitude = double.tryParse(coordinates[1]);
-
-          if (latitude != null && longitude != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ForecastScreen(
-                  latitude: latitude,
-                  longitude: longitude,
-                  selectedIndex: _selectedIndex,
-                  onItemTapped: _onItemTapped,
-                ),
-              ),
-            );
-          }
-        }
-      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ForecastScreen(
+            latitude: latitude,
+            longitude: longitude,
+            selectedIndex: _selectedIndex,
+            onItemTapped: _onItemTapped,
+          ),
+        ),
+      );
     } else if (index == 2) {
-      final location = userData['location'];
-
-      if (location != null) {
-        final coordinates = location.split(',');
-        if (coordinates.length == 2) {
-          final latitude = double.tryParse(coordinates[0]);
-          final longitude = double.tryParse(coordinates[1]);
-
-          if (latitude != null && longitude != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MapScreen(
-                  latitude: latitude,
-                  longitude: longitude,
-                ),
-              ),
-            );
-          }
-        }
-      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MapScreen(
+            latitude: latitude,
+            longitude: longitude,
+          ),
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Weatherly Home"),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _logout,
-          ),
-        ],
-      ),
-      body: FutureBuilder<Map<String, String?>>(
-        future: userDataFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          final userData = snapshot.data;
-          final username = userData?['username'];
-          final location = userData?['location'];
-
-          return Stack(
-            children: [
-              Container(
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage('assets/cloudbg.jpg'),
-                    repeat: ImageRepeat.repeat,
-                    fit: BoxFit.none,
-                  ),
-                ),
+    return ValueListenableBuilder<String?>(
+      valueListenable: AppThemes.selectedTheme ?? ValueNotifier(null),
+      builder: (context, selectedTheme, _) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text("Weatherly Home"),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.palette),
+                tooltip: "Choose Theme",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ThemeSelectorScreen()),
+                  );
+                },
               ),
-
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.white.withOpacity(0.85),
-                      Colors.blueAccent.withOpacity(0.2),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-              ),
-
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    username != null
-                        ? Text(
-                            'Welcome, $username!',
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                          )
-                        : const Text("Loading..."),
-                    const SizedBox(height: 10),
-                    location != null
-                        ? Text(
-                            'Location: $location',
-                            style: const TextStyle(fontSize: 18),
-                          )
-                        : const SizedBox.shrink(),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+              IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: _logout,
               ),
             ],
-          );
-        },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.wb_sunny),
-            label: 'Forecast',
+          body: FutureBuilder<Map<String, String?>>(
+            future: userDataFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+
+              final userData = snapshot.data;
+              final username = userData?['username'];
+              final location = userData?['location'];
+
+              return Container(
+                decoration: AppThemes.getBackgroundDecoration(selectedTheme),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      username != null
+                          ? Text(
+                              'Welcome, $username!',
+                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            )
+                          : const Text("Loading..."),
+                      const SizedBox(height: 10),
+                      location != null
+                          ? Text(
+                              'Location: $location',
+                              style: const TextStyle(fontSize: 18),
+                            )
+                          : const SizedBox.shrink(),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Map',
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.wb_sunny),
+                label: 'Forecast',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.map),
+                label: 'Map',
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
