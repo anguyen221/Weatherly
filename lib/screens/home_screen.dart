@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
@@ -56,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
     });
 
-    if (index == 0) {
+    if (index == 1) {
       final userData = await userDataFuture!;
       final location = userData['location'];
 
@@ -67,12 +65,15 @@ class _HomeScreenState extends State<HomeScreen> {
           final longitude = double.tryParse(coordinates[1]);
 
           if (latitude != null && longitude != null) {
+            // Pass selectedIndex and onItemTapped to ForecastScreen
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => ForecastScreen(
                   latitude: latitude,
                   longitude: longitude,
+                  selectedIndex: _selectedIndex,
+                  onItemTapped: _onItemTapped,
                 ),
               ),
             );
@@ -137,6 +138,10 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.wb_sunny),
             label: 'Forecast',

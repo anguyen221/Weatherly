@@ -5,8 +5,16 @@ import 'dart:convert';
 class ForecastScreen extends StatefulWidget {
   final double latitude;
   final double longitude;
+  final int selectedIndex;
+  final Function(int) onItemTapped;
 
-  const ForecastScreen({super.key, required this.latitude, required this.longitude});
+  const ForecastScreen({
+    super.key,
+    required this.latitude,
+    required this.longitude,
+    required this.selectedIndex,
+    required this.onItemTapped,
+  });
 
   @override
   State<ForecastScreen> createState() => _ForecastScreenState();
@@ -18,6 +26,7 @@ class _ForecastScreenState extends State<ForecastScreen> {
 
   List<dynamic> hourlyForecast = [];
   bool isLoading = true;
+  String errorMessage = '';
 
   @override
   void initState() {
@@ -42,16 +51,19 @@ class _ForecastScreenState extends State<ForecastScreen> {
           });
         } else {
           setState(() {
+            errorMessage = 'No forecast data available.';
             isLoading = false;
           });
         }
       } else {
         setState(() {
+          errorMessage = 'Failed to load weather data.';
           isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
+        errorMessage = 'An error occurred: $e';
         isLoading = false;
       });
     }
@@ -72,27 +84,30 @@ class _ForecastScreenState extends State<ForecastScreen> {
             const SizedBox(height: 10),
             isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : Expanded(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: hourlyForecast.length,
-                      itemBuilder: (context, index) {
-                        final weather = hourlyForecast[index];
-                        final time = weather['dt_txt'];
-                        final temp = weather['main']['temp'];
-                        final weatherDescription = weather['weather'][0]['description'];
+                : errorMessage.isNotEmpty
+                    ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.red, fontSize: 16)))
+                    : Expanded(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: hourlyForecast.length,
+                          itemBuilder: (context, index) {
+                            final weather = hourlyForecast[index];
+                            final time = weather['dt_txt'];
+                            final temp = weather['main']['temp'];
+                            final weatherDescription = weather['weather'][0]['description'];
+                            final iconCode = weather['weather'][0]['icon'];
 
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 5),
-                          child: ListTile(
-                            title: Text('$time - $temp°C', style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text(weatherDescription),
-                            trailing: Icon(Icons.wb_sunny),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                            return Card(
+                              margin: const EdgeInsets.symmetric(vertical: 5),
+                              child: ListTile(
+                                title: Text('$time - $temp°C', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                subtitle: Text(weatherDescription),
+                                trailing: Image.network('https://openweathermap.org/img/wn/$iconCode.png'),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
           ],
         ),
       ),
