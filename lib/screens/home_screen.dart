@@ -1,9 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login_screen.dart';
 import '../services/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,22 +13,30 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String? username;
+  Future<Map<String, String?>>? userDataFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadUsername();
+    userDataFuture = _loadUserData();
   }
 
-  void _loadUsername() async {
+  Future<Map<String, String?>> _loadUserData() async {
     final uid = AuthService().currentUser?.uid;
     if (uid != null) {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-      setState(() {
-        username = doc['username'];
-      });
+      try {
+        final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        if (doc.exists) {
+          return {
+            'username': doc['username'],
+            'location': doc['location'],
+          };
+        }
+      } catch (e) {
+        print("Error loading user data: $e");
+      }
     }
+    return {'username': null, 'location': null};
   }
 
   void _logout() async {
@@ -53,11 +61,48 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Center(
-        child: Text(
-          username != null ? "Welcome, $username!" : "Loading profile...",
-          style: const TextStyle(fontSize: 18),
-        ),
+      body: FutureBuilder<Map<String, String?>>(
+        future: userDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final userData = snapshot.data;
+          final username = userData?['username'];
+          final location = userData?['location'];
+
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                username != null
+                    ? Text(
+                        'Welcome, $username!',
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      )
+                    : const Text("Loading..."),
+                const SizedBox(height: 10),
+                location != null
+                    ? Text(
+                        'Location: $location',
+                        style: const TextStyle(fontSize: 18),
+                      )
+                    : const SizedBox.shrink(),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                  },
+                  child: const Text('View Weather Forecast'),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
