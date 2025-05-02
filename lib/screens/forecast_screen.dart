@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'themes.dart';
 
 class ForecastScreen extends StatefulWidget {
   final double latitude;
@@ -71,46 +72,64 @@ class _ForecastScreenState extends State<ForecastScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Weather Forecast'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('3-Hour Forecast (Next 5 Days)', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : errorMessage.isNotEmpty
-                    ? Center(child: Text(errorMessage, style: const TextStyle(color: Colors.red, fontSize: 16)))
-                    : Expanded(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: hourlyForecast.length,
-                          itemBuilder: (context, index) {
-                            final weather = hourlyForecast[index];
-                            final time = weather['dt_txt'];
-                            final temp = weather['main']['temp'];
-                            final weatherDescription = weather['weather'][0]['description'];
-                            final iconCode = weather['weather'][0]['icon'];
-
-                            return Card(
-                              margin: const EdgeInsets.symmetric(vertical: 5),
-                              child: ListTile(
-                                title: Text('$time - $temp°C', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                subtitle: Text(weatherDescription),
-                                trailing: Image.network('https://openweathermap.org/img/wn/$iconCode.png'),
+    return ValueListenableBuilder<String?>(
+      valueListenable: AppThemes.selectedTheme ?? ValueNotifier(null),
+      builder: (context, selectedTheme, _) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Weather Forecast')),
+          body: Container(
+            decoration: AppThemes.getBackgroundDecoration(selectedTheme),
+            width: double.infinity,
+            height: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '3-Hour Forecast (Next 5 Days)',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : errorMessage.isNotEmpty
+                          ? Center(
+                              child: Text(
+                                errorMessage,
+                                style: const TextStyle(color: Colors.red, fontSize: 16),
                               ),
-                            );
-                          },
-                        ),
-                      ),
-          ],
-        ),
-      ),
+                            )
+                          : Expanded(
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: hourlyForecast.length,
+                                itemBuilder: (context, index) {
+                                  final weather = hourlyForecast[index];
+                                  final time = weather['dt_txt'];
+                                  final temp = weather['main']['temp'];
+                                  final weatherDescription = weather['weather'][0]['description'];
+                                  final iconCode = weather['weather'][0]['icon'];
+
+                                  return Card(
+                                    margin: const EdgeInsets.symmetric(vertical: 5),
+                                    child: ListTile(
+                                      title: Text('$time - $temp°C',
+                                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                                      subtitle: Text(weatherDescription),
+                                      trailing: Image.network(
+                                          'https://openweathermap.org/img/wn/$iconCode.png'),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

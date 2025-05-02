@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'themes.dart';
 
 class CommunityReportsScreen extends StatefulWidget {
   const CommunityReportsScreen({super.key});
@@ -48,60 +49,70 @@ class _CommunityReportsScreenState extends State<CommunityReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Community Reports')),
-      body: location == null
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: const InputDecoration(
-                      labelText: 'Enter your report',
-                      border: OutlineInputBorder(),
-                    ),
+    return ValueListenableBuilder<String?>(
+      valueListenable: AppThemes.selectedTheme ?? ValueNotifier(null),
+      builder: (context, selectedTheme, _) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Community Reports')),
+          body: Container(
+            decoration: AppThemes.getBackgroundDecoration(selectedTheme),
+            width: double.infinity,
+            height: double.infinity,
+            child: location == null
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: TextField(
+                          controller: _messageController,
+                          decoration: const InputDecoration(
+                            labelText: 'Enter your report',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: _postReport,
+                        child: const Text('Post'),
+                      ),
+                      const Divider(),
+                      Expanded(
+                        child: StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('community_reports')
+                              .where('location', isEqualTo: location)
+                              .orderBy('timestamp', descending: true)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+
+                            final reports = snapshot.data!.docs;
+
+                            if (reports.isEmpty) {
+                              return const Center(child: Text('No reports yet.'));
+                            }
+
+                            return ListView.builder(
+                              itemCount: reports.length,
+                              itemBuilder: (context, index) {
+                                final data = reports[index];
+                                return ListTile(
+                                  title: Text(data['message']),
+                                  subtitle: Text('By ${data['username']}'),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: _postReport,
-                  child: const Text('Post'),
-                ),
-                const Divider(),
-                Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('community_reports')
-                        .where('location', isEqualTo: location)
-                        .orderBy('timestamp', descending: true)
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      final reports = snapshot.data!.docs;
-
-                      if (reports.isEmpty) {
-                        return const Center(child: Text('No reports yet.'));
-                      }
-
-                      return ListView.builder(
-                        itemCount: reports.length,
-                        itemBuilder: (context, index) {
-                          final data = reports[index];
-                          return ListTile(
-                            title: Text(data['message']),
-                            subtitle: Text('By ${data['username']}'),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+          ),
+        );
+      },
     );
   }
 }

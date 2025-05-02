@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/auth_service.dart';
+import 'themes.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function(String) onUsernameUpdated;
@@ -48,24 +49,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(labelText: 'Username'),
+    return ValueListenableBuilder<String?>(
+      valueListenable: AppThemes.selectedTheme ?? ValueNotifier(null),
+      builder: (context, selectedTheme, _) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Settings')),
+          body: Container(
+            decoration: AppThemes.getBackgroundDecoration(selectedTheme),
+            width: double.infinity,
+            height: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _usernameController,
+                    decoration: const InputDecoration(labelText: 'Username'),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _updateUsername,
+                    child: const Text('Update Username'),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _updateUsername,
-              child: const Text('Update Username'),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
