@@ -11,6 +11,7 @@ import 'theme_selector.dart';
 import 'share_weather.dart';
 import 'settings_screen.dart';
 import 'community_reports_screen.dart';
+import 'alerts_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -186,6 +187,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const ThemeSelectorScreen()),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.notifications),
+                tooltip: "Alerts",
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const AlertsScreen()),
                   );
                 },
               ),
