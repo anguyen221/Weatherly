@@ -143,29 +143,32 @@ class _HomeScreenState extends State<HomeScreen> {
 
               return Container(
                 decoration: AppThemes.getBackgroundDecoration(selectedTheme),
+                width: double.infinity,
+                height: double.infinity,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       username != null
-                          ? Text(
-                              'Welcome, $username!',
-                              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                            )
-                          : const Text("Loading..."),
+                        ? Text(
+                          'Welcome, $username!',
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                         )
+                        : const Text("Loading..."),
                       const SizedBox(height: 10),
                       location != null
-                          ? Text(
-                              'Location: $location',
-                              style: const TextStyle(fontSize: 18),
-                            )
-                          : const SizedBox.shrink(),
+                        ? Text(
+                          'Location: $location',
+                          style: const TextStyle(fontSize: 18),
+                         )
+                        : const SizedBox.shrink(),
                       const SizedBox(height: 20),
                     ],
                   ),
                 ),
               );
+
             },
           ),
           bottomNavigationBar: BottomNavigationBar(
