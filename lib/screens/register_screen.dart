@@ -54,7 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     LocationData _locationData = await location.getLocation();
     setState(() {
-      _userLocation = 'Lat: ${_locationData.latitude}, Long: ${_locationData.longitude}';
+      _userLocation = '${_locationData.latitude}, ${_locationData.longitude}';
     });
   }
 
