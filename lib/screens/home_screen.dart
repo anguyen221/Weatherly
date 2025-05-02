@@ -9,6 +9,8 @@ import 'theme_selector.dart';
 import 'share_weather.dart';
 import 'settings_screen.dart';
 import 'community_reports_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,7 +22,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Future<Map<String, String?>>? userDataFuture;
   int _selectedIndex = 0;
+  String city = '';
+  String stateName = '';
+  String weatherDescription = '';
+  double temperature = 0.0;
+  String weatherIcon = '';
+  bool isWeatherLoading = true;
   String? _username;
+
+  final String apiKey = 'd6c6999652be6ef551b8088a4851845d';
 
   @override
   void initState() {
@@ -41,9 +51,11 @@ class _HomeScreenState extends State<HomeScreen> {
       try {
         final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
         if (doc.exists) {
+          final location = doc['location'];
+          _fetchWeather(location);
           return {
             'username': doc['username'],
-            'location': doc['location'],
+            'location': location,
           };
         }
       } catch (e) {
@@ -51,6 +63,42 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
     return {'username': null, 'location': null};
+  }
+
+  Future<void> _fetchWeather(String location) async {
+    final coordinates = location.split(',');
+    if (coordinates.length != 2) return;
+
+    final lat = double.tryParse(coordinates[0]);
+    final lon = double.tryParse(coordinates[1]);
+    if (lat == null || lon == null) return;
+
+    final reverseGeoUrl = 'http://api.openweathermap.org/geo/1.0/reverse?lat=$lat&lon=$lon&limit=1&appid=$apiKey';
+    final weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$apiKey&units=metric';
+
+    try {
+      final geoRes = await http.get(Uri.parse(reverseGeoUrl));
+      final weatherRes = await http.get(Uri.parse(weatherUrl));
+
+      if (geoRes.statusCode == 200 && weatherRes.statusCode == 200) {
+        final geoData = json.decode(geoRes.body)[0];
+        final weatherData = json.decode(weatherRes.body);
+
+        setState(() {
+          city = geoData['name'] ?? '';
+          stateName = geoData['state'] ?? '';
+          temperature = weatherData['main']['temp'];
+          weatherDescription = weatherData['weather'][0]['description'];
+          weatherIcon = weatherData['weather'][0]['icon'];
+          isWeatherLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Weather fetch error: $e');
+      setState(() {
+        isWeatherLoading = false;
+      });
+    }
   }
 
   void _logout() async {
@@ -70,38 +118,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final userData = await userDataFuture!;
     final location = userData['location'];
-    if (location == null) return;
 
-    final coordinates = location.split(',');
-    if (coordinates.length != 2) return;
+    if (location != null) {
+      final coordinates = location.split(',');
+      if (coordinates.length == 2) {
+        final latitude = double.tryParse(coordinates[0]);
+        final longitude = double.tryParse(coordinates[1]);
 
-    final latitude = double.tryParse(coordinates[0]);
-    final longitude = double.tryParse(coordinates[1]);
-
-    if (latitude == null || longitude == null) return;
-
-    if (index == 1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ForecastScreen(
-            latitude: latitude,
-            longitude: longitude,
-            selectedIndex: _selectedIndex,
-            onItemTapped: _onItemTapped,
-          ),
-        ),
-      );
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MapScreen(
-            latitude: latitude,
-            longitude: longitude,
-          ),
-        ),
-      );
+        if (latitude != null && longitude != null) {
+          if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ForecastScreen(
+                  latitude: latitude,
+                  longitude: longitude,
+                  selectedIndex: _selectedIndex,
+                  onItemTapped: _onItemTapped,
+                ),
+              ),
+            );
+          } else if (index == 2) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MapScreen(
+                  latitude: latitude,
+                  longitude: longitude,
+                ),
+              ),
+            );
+          }
+        }
+      }
     }
   }
 
@@ -163,7 +212,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
               final userData = snapshot.data;
               final username = _username ?? userData?['username'];
-              final location = userData?['location'];
 
               return Container(
                 decoration: AppThemes.getBackgroundDecoration(selectedTheme),
@@ -181,12 +229,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             )
                           : const Text("Loading..."),
                       const SizedBox(height: 10),
-                      location != null
-                          ? Text(
-                              'Location: $location',
-                              style: const TextStyle(fontSize: 18),
-                            )
-                          : const SizedBox.shrink(),
+                      if (!isWeatherLoading && city.isNotEmpty)
+                        Text('Location: $city, $stateName', style: const TextStyle(fontSize: 18)),
+                      if (!isWeatherLoading && temperature != 0.0)
+                        Text('Temperature: ${temperature.toStringAsFixed(1)}°C', style: const TextStyle(fontSize: 18)),
+                      if (!isWeatherLoading && weatherDescription.isNotEmpty)
+                        Text('Condition: $weatherDescription', style: const TextStyle(fontSize: 18)),
+                      if (!isWeatherLoading && weatherIcon.isNotEmpty)
+                        Image.network('https://openweathermap.org/img/wn/$weatherIcon@2x.png'),
                       const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
