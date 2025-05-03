@@ -39,7 +39,8 @@ class _ForecastScreenState extends State<ForecastScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-            '$apiUrl?lat=${widget.latitude}&lon=${widget.longitude}&appid=$apiKey&units=metric'),
+          '$apiUrl?lat=${widget.latitude}&lon=${widget.longitude}&appid=$apiKey&units=metric',
+        ),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
@@ -112,13 +113,39 @@ class _ForecastScreenState extends State<ForecastScreen> {
                                   final iconCode = weather['weather'][0]['icon'];
 
                                   return Card(
+                                    color: Colors.white.withAlpha((0.85 * 255).round()),
+                                    elevation: 3,
                                     margin: const EdgeInsets.symmetric(vertical: 5),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                     child: ListTile(
-                                      title: Text('$time - $temp°C',
-                                          style: const TextStyle(fontWeight: FontWeight.bold)),
-                                      subtitle: Text(weatherDescription),
-                                      trailing: Image.network(
-                                          'https://openweathermap.org/img/wn/$iconCode.png'),
+                                      title: Text(
+                                        '$time - $temp°C',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        weatherDescription,
+                                        style: const TextStyle(color: Colors.black54),
+                                      ),
+                                      trailing: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(color: Colors.black26, blurRadius: 4),
+                                          ],
+                                        ),
+                                        child: Image.network(
+                                          'https://openweathermap.org/img/wn/$iconCode.png',
+                                          width: 40,
+                                          height: 40,
+                                        ),
+                                      ),
                                     ),
                                   );
                                 },
