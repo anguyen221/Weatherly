@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'themes.dart';
 
 class AlertsScreen extends StatefulWidget {
@@ -16,13 +19,38 @@ class _AlertsScreenState extends State<AlertsScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeFirebase();
     _checkNotificationPermission();
+    _listenToForegroundMessages();
+  }
+
+  Future<void> _initializeFirebase() async {
+    await Firebase.initializeApp();
+    _getFCMToken(); 
   }
 
   Future<void> _checkNotificationPermission() async {
     NotificationSettings settings = await _firebaseMessaging.requestPermission();
     setState(() {
       _isNotificationsEnabled = settings.authorizationStatus == AuthorizationStatus.authorized;
+    });
+  }
+
+  Future<void> _getFCMToken() async {
+    String? token = await _firebaseMessaging.getToken();
+    debugPrint("🔑 FCM Token: $token");
+  }
+
+  void _listenToForegroundMessages() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint("📨 Foreground message: ${message.notification?.title}");
+      if (message.notification != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('📢 ${message.notification!.title ?? "New Alert"}'),
+          ),
+        );
+      }
     });
   }
 
@@ -67,7 +95,9 @@ class _AlertsScreenState extends State<AlertsScreen> {
                   ),
                   const SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                     child: const Text('Save Settings'),
                   ),
                 ],
