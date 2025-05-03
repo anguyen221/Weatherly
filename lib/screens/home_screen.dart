@@ -56,10 +56,14 @@ class _HomeScreenState extends State<HomeScreen> {
         final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
         if (doc.exists) {
           final location = doc['location'];
-          _fetchWeather(location);
+          final username = doc['username'];
+          final effectiveLocation = _customLocation ?? location;
+
+          _fetchWeather(effectiveLocation);
           return {
-            'username': doc['username'],
-            'location': doc['location'],
+            'username': username,
+            'location': location,
+            'customLocation': _customLocation,
           };
         }
       } catch (e) {
@@ -121,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     final userData = await userDataFuture!;
-    final location = userData['location'];
+    final location = _customLocation ?? userData['location'];
     if (location == null) return;
 
     final coordinates = location.split(',');
@@ -142,9 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ).then((_) {
-            setState(() {
-              _selectedIndex = 0;
-            });
+            setState(() => _selectedIndex = 0);
           });
         } else if (index == 2) {
           Navigator.push(
@@ -156,14 +158,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ).then((_) {
-            setState(() {
-              _selectedIndex = 0;
-            });
+            setState(() => _selectedIndex = 0);
           });
         }
       }
     }
-    }
+  }
 
   void _updateUsername(String newUsername) {
     setState(() {
@@ -175,7 +175,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _customLocation = newLocation;
       userDataFuture = _loadUserData();
-      _fetchWeather(newLocation);
     });
   }
 
@@ -221,9 +220,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   );
-                  setState(() {
-                    userDataFuture = _loadUserData();
-                  });
                 },
               ),
               IconButton(
@@ -245,7 +241,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
               final userData = snapshot.data;
               final username = _username ?? userData?['username'];
-              final location = userData?['location'];
 
               return Container(
                 decoration: AppThemes.getBackgroundDecoration(selectedTheme),
