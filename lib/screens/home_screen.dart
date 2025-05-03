@@ -15,7 +15,7 @@ import 'alerts_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const String apiKey = 'YOUR_OPENWEATHERMAP_API_KEY';
+const String apiKey = 'd6c6999652be6ef551b8088a4851845d';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -174,6 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _updateLocation(String newLocation) {
     setState(() {
       _customLocation = newLocation;
+      userDataFuture = _loadUserData();
       _fetchWeather(newLocation);
     });
   }
